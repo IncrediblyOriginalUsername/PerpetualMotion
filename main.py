@@ -48,6 +48,8 @@ BLUE = 0.917, 0.796, 0.380, 1
 DEBOUNCE = 0.1
 INIT_RAMP_SPEED = 150
 RAMP_LENGTH = 725
+cyprus.initialize()
+
 
 
 # ////////////////////////////////////////////////////////////////
@@ -84,6 +86,8 @@ ramp = stepper(port = 0, speed = INIT_RAMP_SPEED)
 # //   SHOULD REFERENCE MAIN FUNCTIONS WITHIN THESE FUNCTIONS   //
 # //      SHOULD NOT INTERACT DIRECTLY WITH THE HARDWARE        //
 # ////////////////////////////////////////////////////////////////
+global sv
+sv = True
 class MainScreen(Screen):
     version = cyprus.read_firmware_version()
     staircaseSpeedText = '0'
@@ -95,7 +99,16 @@ class MainScreen(Screen):
         self.initialize()
 
     def toggleGate(self):
-        print("Open and Close gate here")
+        cyprus.setup_servo(2)
+        global sv
+        if sv == True:
+            cyprus.set_servo_position(2, 0.5)
+            print("Open")
+            sv = False
+        elif sv == False:
+            cyprus.set_servo_position(2, 0)
+            print("Closed")
+            sv = True
 
     def toggleStaircase(self):
         print("Turn on and off staircase here")
