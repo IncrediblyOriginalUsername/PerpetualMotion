@@ -93,6 +93,15 @@ class MainScreen(Screen):
     staircaseSpeedText = '0'
     rampSpeed = INIT_RAMP_SPEED
     staircaseSpeed = 40
+    global rampstatus
+    global stairstatus
+    rampstatus = False
+    stairstatus = False
+    cyprus.initialize()
+    cyprus.set_pwm_values(1, period_value=100000, compare_value=0,
+                          compare_mode=cyprus.LESS_THAN_OR_EQUAL)
+
+
 
     def __init__(self, **kwargs):
         super(MainScreen, self).__init__(**kwargs)
@@ -109,8 +118,30 @@ class MainScreen(Screen):
             cyprus.set_servo_position(2, 0)
             print("Closed")
             sv = True
-
+    def debounce(self):
+        print("Not sure why we need a seperate debounce method but it says it needs one in the instructions")
+    def isBallatBottom(self):
+        if(cyprus.read_gpio() & 0b0010):
+            return True
+        else:
+            return False
+    def isBallatTop(self):
+        if (cyprus.read_gpio() & 0b0001):
+            return True
+        else:
+            return False
     def toggleStaircase(self):
+        global stairstatus
+        global staircaseSpeed
+        if stairstatus == False:
+            stairstatus = True
+            print("yep")
+            cyprus.set_pwm_values(1, period_value=100000, compare_value=staircaseSpeed,
+                                  compare_mode=cyprus.LESS_THAN_OR_EQUAL)
+        else:
+            stairstatus = False
+            cyprus.set_pwm_values(1, period_value=100000, compare_value=0,
+                                  compare_mode=cyprus.LESS_THAN_OR_EQUAL)
         print("Turn on and off staircase here")
         
     def toggleRamp(self):
@@ -136,6 +167,7 @@ class MainScreen(Screen):
     
     def quit(self):
         print("Exit")
+        cyprus.close()
         MyApp().stop()
 
 sm.add_widget(MainScreen(name = 'main'))
