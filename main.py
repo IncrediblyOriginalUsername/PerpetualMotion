@@ -19,6 +19,7 @@ from kivy.uix.label import Label
 from kivy.uix.widget import Widget
 from kivy.uix.slider import Slider
 from kivy.uix.image import Image
+from threading import Thread
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.clock import Clock
 from kivy.animation import Animation
@@ -94,7 +95,9 @@ class MainScreen(Screen):
     rampSpeed = INIT_RAMP_SPEED
     staircaseSpeed = 40
     global rampstatus
+    global autot
     global stairstatus
+    autot = False
     rampstatus = False
     stairstatus = False
     cyprus.initialize()
@@ -121,21 +124,30 @@ class MainScreen(Screen):
     def debounce(self):
         print("Not sure why we need a seperate debounce method but it says it needs one in the instructions")
     def isBallatBottom(self):
-        if(cyprus.read_gpio() & 0b0010):
-            return True
+        global autot
+        if(cyprus.read_gpio() & 0b0010) == 0:
+            print("gamers")
         else:
-            return False
+            self.toggleRamp()
+
     def isBallatTop(self):
-        if (cyprus.read_gpio() & 0b0001):
-            return True
+        global autot
+        if (cyprus.read_gpio() & 0b0001) == 1:
+            print("gamers")
         else:
-            return False
+            self.toggleRamp()
+    def runThing(self):
+        while autot == True:
+            self.isBallatBottom()
+            self.isBallatTop()
+            sleep(.1)
     def toggleStaircase(self):
         global stairstatus
         global staircaseSpeed
+        staircaseSpeed = self.staircaseSpeed * 400
         if stairstatus == False:
             stairstatus = True
-            print("yep")
+            print("yep + %d" % staircaseSpeed)
             cyprus.set_pwm_values(1, period_value=100000, compare_value=staircaseSpeed,
                                   compare_mode=cyprus.LESS_THAN_OR_EQUAL)
         else:
@@ -143,11 +155,15 @@ class MainScreen(Screen):
             cyprus.set_pwm_values(1, period_value=100000, compare_value=0,
                                   compare_mode=cyprus.LESS_THAN_OR_EQUAL)
         print("Turn on and off staircase here")
-        
+
     def toggleRamp(self):
         print("Move ramp up and down here")
         
     def auto(self):
+        global autot
+        autot = True
+        Thread(target = self.runThing()).start()
+        Thread.daemon = True
         print("Run through one cycle of the perpetual motion machine")
         
     def setRampSpeed(self, speed):
