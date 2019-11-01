@@ -99,6 +99,8 @@ class MainScreen(Screen):
     staircaseSpeedText = '0'
     rampSpeed = INIT_RAMP_SPEED
     staircaseSpeed = 40
+    global stairz
+    stairz = staircaseSpeed
     global rampstatus
     global autot
     global stairstatus
@@ -130,16 +132,20 @@ class MainScreen(Screen):
         print("Not sure why we need a seperate debounce method but it says it needs one in the instructions")
     def isBallatBottom(self):
         global autot
-        if(cyprus.read_gpio() & 0b0010) == 0:
+        if(cyprus.read_gpio() & 0b0100) == 0:
             print("gamers")
+            sleep(.01)
         else:
+            sleep(.01)
             self.toggleRamp()
 
     def isBallatTop(self):
         global autot
         if (cyprus.read_gpio() & 0b0001) == 1:
             print("gamers")
+            sleep(.01)
         else:
+            sleep(.01)
             self.toggleRamp()
     def runThing(self):
         while autot == True:
@@ -148,12 +154,12 @@ class MainScreen(Screen):
             sleep(.1)
     def toggleStaircase(self):
         global stairstatus
-        global staircaseSpeed
-        staircaseSpeed = self.staircaseSpeed * 400
+        global stairz
+        stair = stairz * 400
         if stairstatus == False:
             stairstatus = True
-            print("yep + %d" % staircaseSpeed)
-            cyprus.set_pwm_values(1, period_value=100000, compare_value=staircaseSpeed,
+            print("yep + %d" % stair)
+            cyprus.set_pwm_values(1, period_value=100000, compare_value=stair,
                                   compare_mode=cyprus.LESS_THAN_OR_EQUAL)
         else:
             stairstatus = False
@@ -175,9 +181,10 @@ class MainScreen(Screen):
         print("Set the ramp speed and update slider text")
         
     def setStaircaseSpeed(self, speed):
-        global staircaseSpeed
+        global stairz
         global on
-        staircaseSpeed = self.ids.slr.value
+        stairz = self.ids.staircaseSpeed.value
+        print("%d" % stairz)
         self.toggleStaircase()
         self.toggleStaircase()
         print("Set the staircase speed and update slider text")
