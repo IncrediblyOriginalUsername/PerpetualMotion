@@ -104,6 +104,8 @@ class MainScreen(Screen):
     global stairz
     global rampz
     global dire
+    global bruh
+    bruh = False
     dire =1
     rampz = rampSpeed
     stairz = staircaseSpeed
@@ -150,15 +152,30 @@ class MainScreen(Screen):
 
     def isBallatBottom(self):
         global autot
+        global dire
+        global bruh
         global sv
         if (cyprus.read_gpio() & 0b0001) == 1:
             print("gamers")
             sleep(.01)
         else:
             sleep(.01)
-            if(sv == True):
-                self.toggleGate()
-            self.toggleRamp()
+            dire = 1
+            print(sv)
+            if(sv == False):
+                if(bruh == True):
+                    self.toggleGate()
+                    sleep(2)
+                    self.toggleStaircase()
+                    sleep(2)
+                    bruh = False
+                    autot = False
+                    self.toggleRamp()
+                    print("activatedfff")
+            elif bruh == True:
+                autot = False
+                print("activated")
+                self.toggleRamp()
     def runThing(self):
         while autot == True:
             self.isBallatBottom()
@@ -166,7 +183,7 @@ class MainScreen(Screen):
     def toggleStaircase(self):
         global stairstatus
         global stairz
-        stair = stairz * 400
+        stair = stairz * 800
         if stairstatus == False:
             stairstatus = True
             print("yep + %d" % stair)
@@ -183,7 +200,7 @@ class MainScreen(Screen):
         global dire
         global autot
         if(dire == 1):
-            s0.set_speed_in_steps(rampz*3)
+            s0.set_speed_in_steps(rampz*4)
             s0.relative_move(28.5)
             dire = 0
             self.toggleRamp()
@@ -191,18 +208,20 @@ class MainScreen(Screen):
             sleep(0.05)
             s0.stop()
             sleep(0.5)
-            s0.run(0, rampz * 3)
+            s0.run(0, rampz * 5)
             #s0.run(0, rampz * 6)
             autot = False
             dire =1
         
     def auto(self):
         while True:
+            global bruh
+            bruh = True
             global autot
             self.toggleRamp()
-            Thread.daemon = True
-            self.toggleGate()
             sleep(1)
+            self.toggleGate()
+            sleep(2)
             self.toggleStaircase()
             autot = True
             self.runThing()
