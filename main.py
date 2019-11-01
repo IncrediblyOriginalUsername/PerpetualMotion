@@ -6,6 +6,7 @@ import math
 import sys
 import time
 import threading
+import spidev
 
 from kivy.app import App
 from kivy.lang import Builder
@@ -31,6 +32,7 @@ from pidev.kivy import PauseScreen
 from time import sleep
 import RPi.GPIO as GPIO 
 from pidev.stepper import stepper
+spi = spidev.SpiDev()
 from pidev.Cyprus_Commands import Cyprus_Commands_RPi as cyprus
 
 
@@ -139,7 +141,7 @@ class MainScreen(Screen):
         print("Not sure why we need a seperate debounce method but it says it needs one in the instructions")
     def isBallatBottom(self):
         global autot
-        if(cyprus.read_gpio() & 0b0100) == 0:
+        if(cyprus.read_gpio() & 0b0001) == 0:
             print("gamers")
             sleep(.01)
         else:
@@ -178,12 +180,15 @@ class MainScreen(Screen):
         global dire
         global autot
         if(dire == 1):
-            s0.run(1, rampz * 6 )
+            s0.run(1, rampz * 1.5)
             dire = 0
             autot = True
             Thread(target=self.runThing()).start()
         else:
-            s0.run(0, rampz * 6)
+            s0.stop()
+            sleep(0.1)
+            s0.run(0, rampz * 1.5)
+            #s0.run(0, rampz * 6)
             autot = False
             dire =1
         
@@ -225,6 +230,9 @@ class MainScreen(Screen):
     
     def quit(self):
         print("Exit")
+        s0.free_all()
+        spi.close()
+        GPIO.cleanup()
         cyprus.close()
         MyApp().stop()
 
