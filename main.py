@@ -47,6 +47,8 @@ CLOSE = True
 YELLOW = .180, 0.188, 0.980, 1
 BLUE = 0.917, 0.796, 0.380, 1
 DEBOUNCE = 0.1
+global RAMP_LENGTH
+global INIT_RAMP_SPEED
 INIT_RAMP_SPEED = 150
 RAMP_LENGTH = 725
 cyprus.initialize()
@@ -87,6 +89,9 @@ ramp = stepper(port = 0, speed = INIT_RAMP_SPEED)
 # //   SHOULD REFERENCE MAIN FUNCTIONS WITHIN THESE FUNCTIONS   //
 # //      SHOULD NOT INTERACT DIRECTLY WITH THE HARDWARE        //
 # ////////////////////////////////////////////////////////////////
+s0 = stepper(port=0, micro_steps=32, hold_current=20, run_current=20, accel_current=20, deaccel_current=20,
+                 steps_per_unit=200, speed=8)
+s0.free_all()
 global sv
 sv = True
 class MainScreen(Screen):
@@ -170,6 +175,11 @@ class MainScreen(Screen):
         print("Set the ramp speed and update slider text")
         
     def setStaircaseSpeed(self, speed):
+        global staircaseSpeed
+        global on
+        staircaseSpeed = self.ids.slr.value
+        self.toggleStaircase()
+        self.toggleStaircase()
         print("Set the staircase speed and update slider text")
         
     def initialize(self):
