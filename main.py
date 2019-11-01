@@ -100,6 +100,10 @@ class MainScreen(Screen):
     rampSpeed = INIT_RAMP_SPEED
     staircaseSpeed = 40
     global stairz
+    global rampz
+    global dire
+    dire =1
+    rampz = rampSpeed
     stairz = staircaseSpeed
     global rampstatus
     global autot
@@ -108,6 +112,9 @@ class MainScreen(Screen):
     rampstatus = False
     stairstatus = False
     cyprus.initialize()
+    global s0
+    s0 = stepper(port=0, micro_steps=32, hold_current=20, run_current=20, accel_current=20, deaccel_current=20,
+                 steps_per_unit=200, speed=8)
     cyprus.set_pwm_values(1, period_value=100000, compare_value=0,
                           compare_mode=cyprus.LESS_THAN_OR_EQUAL)
 
@@ -149,9 +156,8 @@ class MainScreen(Screen):
             self.toggleRamp()
     def runThing(self):
         while autot == True:
-            self.isBallatBottom()
+           # self.isBallatBottom()
             self.isBallatTop()
-            sleep(.1)
     def toggleStaircase(self):
         global stairstatus
         global stairz
@@ -168,7 +174,18 @@ class MainScreen(Screen):
         print("Turn on and off staircase here")
 
     def toggleRamp(self):
-        print("Move ramp up and down here")
+        global rampz
+        global dire
+        global autot
+        if(dire == 1):
+            s0.run(1, rampz * 6 )
+            dire = 0
+            autot = True
+            Thread(target=self.runThing()).start()
+        else:
+            s0.run(0, rampz * 6)
+            autot = False
+            dire =1
         
     def auto(self):
         global autot
@@ -178,12 +195,20 @@ class MainScreen(Screen):
         print("Run through one cycle of the perpetual motion machine")
         
     def setRampSpeed(self, speed):
+        global rampz
+        global on
+        rampz = self.ids.rampSpeed.value
+        print("%d" % rampz)
+        self.ids.rampSpeedLabel.text = "%d" % rampz
+        self.toggleRamp()
+        self.toggleRamp()
         print("Set the ramp speed and update slider text")
         
     def setStaircaseSpeed(self, speed):
         global stairz
         global on
         stairz = self.ids.staircaseSpeed.value
+        self.ids.staircaseSpeedLabel.text = "%d" % stairz
         print("%d" % stairz)
         self.toggleStaircase()
         self.toggleStaircase()
