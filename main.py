@@ -179,6 +179,15 @@ class MainScreen(Screen):
         while autot == True & aaaaa == True:
             self.isBallatBottom()
             #self.isBallatTop()
+    def buttonStair(self):
+        if(aaaaa == False):
+            self.toggleStaircase()
+    def buttonGate(self):
+        if (aaaaa == False):
+            self.toggleGate()
+    def buttonRamp(self):
+        if(aaaaa == False):
+            self.toggleRamp()
     def toggleStaircase(self):
         global stairstatus
         global stairz
@@ -261,8 +270,6 @@ class MainScreen(Screen):
         rampz = self.ids.rampSpeed.value
         print("%d" % rampz)
         self.ids.rampSpeedLabel.text = "%d" % rampz
-        self.toggleRamp()
-        self.toggleRamp()
         print("Set the ramp speed and update slider text")
         
     def setStaircaseSpeed(self, speed):
@@ -271,8 +278,6 @@ class MainScreen(Screen):
         stairz = self.ids.staircaseSpeed.value
         self.ids.staircaseSpeedLabel.text = "%d" % stairz
         print("%d" % stairz)
-        self.toggleStaircase()
-        self.toggleStaircase()
         print("Set the staircase speed and update slider text")
         
     def initialize(self):
