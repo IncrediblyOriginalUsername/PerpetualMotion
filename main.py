@@ -116,6 +116,9 @@ class MainScreen(Screen):
     rampstatus = False
     stairstatus = False
     cyprus.initialize()
+    cyprus.setup_servo(2)
+    global aaaaa
+    aaaaa = False
     global s0
     s0 = stepper(port=0, micro_steps=32, hold_current=20, run_current=20, accel_current=20, deaccel_current=20,
                  steps_per_unit=200, speed=8)
@@ -129,7 +132,6 @@ class MainScreen(Screen):
         self.initialize()
 
     def toggleGate(self):
-        cyprus.setup_servo(2)
         global sv
         if sv == True:
             cyprus.set_servo_position(2, 0.5)
@@ -165,19 +167,16 @@ class MainScreen(Screen):
             if(sv == False):
                 if(bruh == True):
                     self.toggleGate()
-                    sleep(2)
+                    sleep(1)
                     self.toggleStaircase()
-                    sleep(2)
+                    sleep(1)
                     bruh = False
                     autot = False
-                    self.toggleRamp()
                     print("activatedfff")
-            elif bruh == True:
-                autot = False
-                print("activated")
-                self.toggleRamp()
     def runThing(self):
-        while autot == True:
+        global aaaaa
+        global dire
+        while autot == True & aaaaa == True:
             self.isBallatBottom()
             #self.isBallatTop()
     def toggleStaircase(self):
@@ -204,27 +203,54 @@ class MainScreen(Screen):
             s0.relative_move(28.5)
             dire = 0
             self.toggleRamp()
-        else:
+        elif s0.isBusy() == False:
             sleep(0.05)
             s0.stop()
             sleep(0.5)
-            s0.run(0, rampz * 5)
+            s0.set_speed_in_steps(rampz * 6)
+            s0.relative_move(-28.5)
             #s0.run(0, rampz * 6)
             autot = False
             dire =1
-        
+
     def auto(self):
-        while True:
+        global aaaaa
+        global autot
+        if(aaaaa == False):
+            aaaaa = True
+            Thread(target=self.autom).start()
+            Thread.daemon = True
+        else:
+            autot = False
+            aaaaa = False
+
+    def autom(self):
+        global aaaaa
+        while aaaaa == True:
             global bruh
             bruh = True
             global autot
+            if (aaaaa == False):
+                return
             self.toggleRamp()
+            if(aaaaa == False):
+                return
             sleep(1)
+            if (aaaaa == False):
+                return
             self.toggleGate()
-            sleep(2)
+            if (aaaaa == False):
+                return
+            sleep(1)
+            if (aaaaa == False):
+                return
             self.toggleStaircase()
+            if (aaaaa == False):
+                return
             autot = True
             self.runThing()
+            if (aaaaa == False):
+                return
 
 
      #   print("Run through one cycle of the perpetual motion machine")
